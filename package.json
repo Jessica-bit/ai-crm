@@ -1,0 +1,22 @@
+{
+  "name": "ai-crm",
+  "private": true,
+  "version": "0.0.1",
+  "description": "AI CRM — CRM moderno com recursos de Inteligência Artificial",
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api start:dev",
+    "build:web": "pnpm --filter web build",
+    "build:api": "pnpm --filter api build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "packageManager": "pnpm@11.11.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

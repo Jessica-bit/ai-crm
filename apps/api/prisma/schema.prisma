@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum ActivityType {
+  MANUAL
+  AI_SUMMARY
+}
+
+// ============================================================
+// USER
+// ============================================================
+
+model User {
+  id                  String   @id @default(cuid())
+  name                String
+  email               String   @unique
+  passwordHash        String   @map("password_hash")
+  hashedRefreshToken  String?  @map("hashed_refresh_token")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  contacts   Contact[]
+  deals      Deal[]
+  stages     Stage[]
+  activities Activity[] @relation("ActivityAuthor")
+
+  @@map("users")
+}
+
+// ============================================================
+// CONTACT
+// ============================================================
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  company   String?
+  tags      String[]
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deals      Deal[]
+  activities Activity[]
+
+  @@index([userId])
+  @@index([name])
+  @@index([userId, email])
+  @@map("contacts")
+}
+
+// ============================================================
+// STAGE
+// ============================================================
+
+model Stage {
+  id        String   @id @default(cuid())
+  name      String
+  order     Int
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deals Deal[]
+
+  @@index([userId])
+  @@index([userId, order])
+  @@map("stages")
+}
+
+// ============================================================
+// DEAL
+// ============================================================
+
+model Deal {
+  id                String    @id @default(cuid())
+  title             String
+  value             Decimal   @db.Decimal(10, 2)
+  expectedCloseDate DateTime? @map("expected_close_date")
+  contactId         String    @map("contact_id")
+  stageId           String    @map("stage_id")
+  userId            String    @map("user_id")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  contact    Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  stage      Stage      @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activities Activity[]
+
+  @@index([userId])
+  @@index([contactId])
+  @@index([stageId])
+  @@map("deals")
+}
+
+// ============================================================
+// ACTIVITY
+// (histórico de interações: notas manuais + resumos de IA)
+// ============================================================
+
+model Activity {
+  id          String       @id @default(cuid())
+  content     String
+  type        ActivityType
+  contactId   String?      @map("contact_id")
+  dealId      String?      @map("deal_id")
+  authorId    String?      @map("author_id")
+  aiModelName String?      @map("ai_model_name")
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  deal    Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  author  User?    @relation("ActivityAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([contactId])
+  @@index([dealId])
+  @@index([type])
+  @@map("activities")
+}
