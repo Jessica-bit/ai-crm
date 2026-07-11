@@ -1,32 +1,63 @@
+# =========================
 # Dependencies
+# =========================
 node_modules/
 .pnpm-store/
 
+# =========================
 # Build outputs
+# =========================
 .next/
 dist/
 build/
+coverage/
+out/
 
-# Env
+# =========================
+# Environment
+# =========================
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
+# =========================
 # Logs
+# =========================
 *.log
 npm-debug.log*
 pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Editor
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+
+# =========================
+# Prisma
+# =========================
+apps/api/generated/
+
+# =========================
+# IDE
+# =========================
 .vscode/*
 !.vscode/extensions.json
 .idea/
 
-# OS
+# =========================
+# Operating System
+# =========================
 .DS_Store
+Thumbs.db
 
-# Prisma
-apps/api/generated/
+# =========================
+# Turbo (caso utilize futuramente)
+# =========================
+.turbo/
 
-# Misc
-*.tsbuildinfo
+# =========================
+# Cache
+# =========================
+.cache/
