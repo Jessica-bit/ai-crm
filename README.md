@@ -76,6 +76,38 @@ curl -X POST http://localhost:3001/auth/logout \
   -H "Authorization: Bearer <accessToken>"
 ```
 
+## Módulo Contacts (Sprint 3)
+
+Todas as rotas abaixo exigem autenticação (`Authorization: Bearer <accessToken>`) e são sempre restritas ao usuário autenticado — nunca é possível ver, editar ou remover contatos de outro usuário. A exclusão é lógica (soft delete via `deletedAt`); nenhum contato é apagado fisicamente.
+
+```bash
+# Criar contato
+curl -X POST http://localhost:3001/contacts \
+  -H "Authorization: Bearer <accessToken>" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Maria Souza","email":"maria@empresa.com","company":"Empresa X","position":"Compradora"}'
+
+# Listar (paginado, com filtros opcionais)
+curl "http://localhost:3001/contacts?page=1&limit=10&name=Maria" \
+  -H "Authorization: Bearer <accessToken>"
+
+# Buscar por id
+curl http://localhost:3001/contacts/<id> \
+  -H "Authorization: Bearer <accessToken>"
+
+# Atualizar (qualquer campo, todos opcionais)
+curl -X PATCH http://localhost:3001/contacts/<id> \
+  -H "Authorization: Bearer <accessToken>" \
+  -H "Content-Type: application/json" \
+  -d '{"phone":"(15) 99999-0000"}'
+
+# Remover (soft delete)
+curl -X DELETE http://localhost:3001/contacts/<id> \
+  -H "Authorization: Bearer <accessToken>"
+```
+
+Um contato de outro usuário, ou já removido (soft deleted), retorna `404` em `GET`, `PATCH` e `DELETE`.
+
 ## Desenvolvimento
 
 ```bash
@@ -93,4 +125,5 @@ Com o banco configurado, `GET http://localhost:3001/health` deve retornar:
 - ✅ Fundação do monorepo (Next.js + NestJS + TypeScript compartilhado)
 - ✅ Banco de dados: Docker Compose, Prisma, primeira migration e seed
 - ✅ Autenticação: registro, login, JWT (access + refresh), guards, GET /me, logout
-- ⏳ Módulos de negócio (Contacts, Deals, Stages, Activities), telas e IA: ainda não implementados
+- ✅ Módulo Contacts: CRUD completo, paginação, filtros, soft delete
+- ⏳ Módulos de negócio (Deals, Stages, Activities), telas e IA: ainda não implementados

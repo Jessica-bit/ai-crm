@@ -4,8 +4,9 @@ import { AppController } from './app.controller';
 import jwtConfig from './config/jwt.config';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ContactsModule } from './modules/contacts/contacts.module';
 
-// Módulos de negócio (contacts, deals, stages, activities, ai)
+// Módulos de negócio (deals, stages, activities, ai)
 // serão registrados aqui em etapas futuras.
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     PrismaModule,
     AuthModule,
+    ContactsModule,
   ],
   controllers: [AppController],
   providers: [],
