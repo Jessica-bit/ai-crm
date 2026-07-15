@@ -79,7 +79,6 @@ model Stage {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deals Deal[]
 
   @@index([userId])
   @@index([userId, order])
@@ -91,24 +90,25 @@ model Stage {
 // ============================================================
 
 model Deal {
-  id                String    @id @default(cuid())
-  title             String
-  value             Decimal   @db.Decimal(10, 2)
-  expectedCloseDate DateTime? @map("expected_close_date")
-  contactId         String    @map("contact_id")
-  stageId           String    @map("stage_id")
-  userId            String    @map("user_id")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  id              String    @id @default(cuid())
+  title           String
+  value           Decimal   @default(0) @db.Decimal(10, 2)
+  status          String    @default("OPEN")
+  expectedCloseAt DateTime? @map("expected_close_at")
+  notes           String?
+  contactId       String    @map("contact_id")
+  userId          String    @map("user_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
 
   contact    Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  stage      Stage      @relation(fields: [stageId], references: [id], onDelete: Restrict)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   activities Activity[]
 
   @@index([userId])
   @@index([contactId])
-  @@index([stageId])
+  @@index([deletedAt])
   @@map("deals")
 }
 
