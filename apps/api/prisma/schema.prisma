@@ -71,17 +71,21 @@ model Contact {
 // ============================================================
 
 model Stage {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
+  color     String?
   order     Int
-  userId    String   @map("user_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  userId    String    @map("user_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deals Deal[]
 
   @@index([userId])
   @@index([userId, order])
+  @@index([deletedAt])
   @@map("stages")
 }
 
@@ -97,17 +101,20 @@ model Deal {
   expectedCloseAt DateTime? @map("expected_close_at")
   notes           String?
   contactId       String    @map("contact_id")
+  stageId         String?   @map("stage_id")
   userId          String    @map("user_id")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
   deletedAt       DateTime? @map("deleted_at")
 
   contact    Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  stage      Stage?     @relation(fields: [stageId], references: [id])
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   activities Activity[]
 
   @@index([userId])
   @@index([contactId])
+  @@index([stageId])
   @@index([deletedAt])
   @@map("deals")
 }

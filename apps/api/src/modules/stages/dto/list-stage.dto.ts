@@ -1,22 +1,10 @@
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
-export class ListDealDto {
+export class ListStageDto {
   @IsOptional()
   @IsString()
-  title?: string;
-
-  @IsOptional()
-  @IsString()
-  status?: string;
-
-  @IsOptional()
-  @IsString()
-  contactId?: string;
-
-  @IsOptional()
-  @IsString()
-  stageId?: string;
+  name?: string;
 
   @IsOptional()
   @Type(() => Number)

@@ -12,13 +12,17 @@ export class DealsService {
   async create(userId: string, dto: CreateDealDto) {
     await this.ensureContactBelongsToUser(userId, dto.contactId);
 
+    if (dto.stageId) {
+      await this.ensureStageBelongsToUser(userId, dto.stageId);
+    }
+
     return this.prisma.deal.create({
       data: { ...dto, userId },
     });
   }
 
   async findAll(userId: string, query: ListDealDto) {
-    const { page, limit, title, status, contactId } = query;
+    const { page, limit, title, status, contactId, stageId } = query;
 
     const where: Prisma.DealWhereInput = {
       userId,
@@ -26,6 +30,7 @@ export class DealsService {
       ...(title && { title: { contains: title, mode: 'insensitive' } }),
       ...(status && { status }),
       ...(contactId && { contactId }),
+      ...(stageId && { stageId }),
     };
 
     const [data, total] = await Promise.all([
@@ -69,6 +74,10 @@ export class DealsService {
       await this.ensureContactBelongsToUser(userId, dto.contactId);
     }
 
+    if (dto.stageId) {
+      await this.ensureStageBelongsToUser(userId, dto.stageId);
+    }
+
     return this.prisma.deal.update({
       where: { id },
       data: dto,
@@ -91,6 +100,16 @@ export class DealsService {
 
     if (!contact) {
       throw new NotFoundException('Contato não encontrado');
+    }
+  }
+
+  private async ensureStageBelongsToUser(userId: string, stageId: string) {
+    const stage = await this.prisma.stage.findFirst({
+      where: { id: stageId, userId, deletedAt: null },
+    });
+
+    if (!stage) {
+      throw new NotFoundException('Estágio não encontrado');
     }
   }
 }

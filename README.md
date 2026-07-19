@@ -108,6 +108,70 @@ curl -X DELETE http://localhost:3001/contacts/<id> \
 
 Um contato de outro usuário, ou já removido (soft deleted), retorna `404` em `GET`, `PATCH` e `DELETE`.
 
+## Módulo Deals (Sprint 4)
+
+Todas as rotas exigem autenticação (`Authorization: Bearer <accessToken>`) e são sempre restritas ao usuário autenticado — nunca é possível ver, editar ou remover deals de outro usuário. Cada deal pertence a um `Contact`, que também precisa pertencer ao usuário autenticado (validado no `create` e sempre que `contactId` é alterado). Opcionalmente, um deal pode ser associado a um `Stage` via `stageId` (validado da mesma forma). A exclusão é lógica (soft delete via `deletedAt`); nenhum deal é apagado fisicamente. O campo `status` permanece disponível (inicial: `OPEN`) como complemento ao pipeline.
+
+```bash
+# Criar deal
+curl -X POST http://localhost:3001/deals \
+  -H "Authorization: Bearer <accessToken>" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Contrato anual","contactId":"<contactId>","stageId":"<stageId>","value":15000.00}'
+
+# Listar (paginado, com filtros opcionais)
+curl "http://localhost:3001/deals?page=1&limit=10&status=OPEN" \
+  -H "Authorization: Bearer <accessToken>"
+
+# Buscar por id
+curl http://localhost:3001/deals/<id> \
+  -H "Authorization: Bearer <accessToken>"
+
+# Atualizar (qualquer campo, todos opcionais)
+curl -X PATCH http://localhost:3001/deals/<id> \
+  -H "Authorization: Bearer <accessToken>" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"WON"}'
+
+# Remover (soft delete)
+curl -X DELETE http://localhost:3001/deals/<id> \
+  -H "Authorization: Bearer <accessToken>"
+```
+
+Um deal de outro usuário, ou já removido (soft deleted), retorna `404` em `GET`, `PATCH` e `DELETE`. Criar ou atualizar um deal apontando para um `contactId` ou `stageId` inexistente ou de outro usuário também retorna `404`.
+
+## Módulo Stages / Pipeline (Sprint 5)
+
+Todas as rotas exigem autenticação (`Authorization: Bearer <accessToken>`) e são sempre restritas ao usuário autenticado. A exclusão é lógica (soft delete via `deletedAt`); nenhum estágio é apagado fisicamente. Um estágio com deals vinculados (não removidos) **não pode ser excluído** — a tentativa retorna `409 Conflict`. Deals agora podem ser associados a um estágio via `stageId` (opcional, para não quebrar deals já existentes sem pipeline).
+
+```bash
+# Criar estágio
+curl -X POST http://localhost:3001/stages \
+  -H "Authorization: Bearer <accessToken>" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Qualificação","color":"#facc15","order":1}'
+
+# Listar (paginado, ordenado por "order")
+curl "http://localhost:3001/stages?page=1&limit=10" \
+  -H "Authorization: Bearer <accessToken>"
+
+# Buscar por id
+curl http://localhost:3001/stages/<id> \
+  -H "Authorization: Bearer <accessToken>"
+
+# Atualizar
+curl -X PATCH http://localhost:3001/stages/<id> \
+  -H "Authorization: Bearer <accessToken>" \
+  -H "Content-Type: application/json" \
+  -d '{"order":2}'
+
+# Remover (soft delete — falha com 409 se houver deals vinculados)
+curl -X DELETE http://localhost:3001/stages/<id> \
+  -H "Authorization: Bearer <accessToken>"
+```
+
+Um estágio de outro usuário, ou já removido, retorna `404` em `GET`, `PATCH` e `DELETE`.
+
 ## Desenvolvimento
 
 ```bash
@@ -126,4 +190,6 @@ Com o banco configurado, `GET http://localhost:3001/health` deve retornar:
 - ✅ Banco de dados: Docker Compose, Prisma, primeira migration e seed
 - ✅ Autenticação: registro, login, JWT (access + refresh), guards, GET /me, logout
 - ✅ Módulo Contacts: CRUD completo, paginação, filtros, soft delete
-- ⏳ Módulos de negócio (Deals, Stages, Activities), telas e IA: ainda não implementados
+- ✅ Módulo Deals: CRUD completo, vínculo com Contacts e Stages, paginação, filtros, soft delete
+- ✅ Módulo Stages/Pipeline: CRUD completo, ordenação por estágio, soft delete, proteção contra exclusão com deals vinculados
+- ⏳ Módulos de negócio (Activities), telas e IA: ainda não implementados

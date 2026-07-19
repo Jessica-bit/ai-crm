@@ -6,8 +6,9 @@ import { PrismaModule } from './database/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
 import { DealsModule } from './modules/deals/deals.module';
+import { StagesModule } from './modules/stages/stages.module';
 
-// Módulos de negócio (stages, activities, ai)
+// Módulos de negócio (activities, ai)
 // serão registrados aqui em etapas futuras.
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { DealsModule } from './modules/deals/deals.module';
     AuthModule,
     ContactsModule,
     DealsModule,
+    StagesModule,
   ],
   controllers: [AppController],
   providers: [],
